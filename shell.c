@@ -1,3 +1,4 @@
+/* Note: you can't use `|`  `&` */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -8,6 +9,7 @@
 
 #define MAX_CMD_LEN 256
 #define MAX_TOKENS 16
+
 
 char cmd[MAX_CMD_LEN];
 char *args[MAX_TOKENS];
@@ -35,13 +37,6 @@ void readUserCommand(void)
 void tokenizeCommand(void)
 {
     i = 0;
-    // args = (char **)malloc(MAX_TOKENS * sizeof(char *));
-    // if (args == NULL)
-    // {
-    //     perror("Error: Couldn't allocate memory for args.\n");
-    //     exit(EXIT_FAILURE);
-    // }
-
     char *token;
     char *delim = " ";
     token = strtok(cmd, delim);
@@ -55,21 +50,11 @@ void tokenizeCommand(void)
     args[i] = NULL;
 }
 
-void freeTokens(void)
-{
-    for (int j = 0; j < i; j++)
-    {
-        free(args[j]);
-        args[j] = NULL;
-    }
-    
-    //args = NULL;
-}
+
 
 void handleCtrlC(int signum)
 {
     (void)signum;
-    //freeTokens();
     exit(EXIT_SUCCESS);
 }
 
@@ -84,6 +69,7 @@ void runShell(void)
 
     while (1)
     {
+
         readUserCommand();
         /* Handle Ctrl + D */
         if (feof(stdin))
@@ -98,7 +84,39 @@ void runShell(void)
         /* Handle commands here! */
         else
         {
+            pid_t pid;
             tokenizeCommand();
+            /* exit! */
+            if (!strcmp(args[0], "exit"))
+            {
+                break;
+            }
+            else if(!strcmp(args[0], "cd"))
+            {
+                printf("Where you going?\n");
+                continue;
+            }
+            pid = fork();
+            /* Error */
+            if (pid < 0)
+            {
+                printf("Error: fork.\n");
+                exit(EXIT_FAILURE);
+            }
+            /* child */
+            else if (pid == 0)
+            {
+                if(execvp(args[0], args))
+                {
+                    printf("%s: command not found\n", args[0]);
+                    exit(EXIT_FAILURE);
+                }
+            }
+            /* Parent */
+            else
+            {
+                waitpid(pid, NULL, 0);
+            }
         }
     }
     
