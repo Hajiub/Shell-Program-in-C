@@ -17,50 +17,19 @@ short int i = 0;
 
 void readUserCommand(void);
 void tokenizeCommand(void);
-void freeTokens(void);
 void handleCtrlC(int signum);
 void runShell(void);
 
 int main()
 {
+    /* Start the shell */
     runShell();
     return 0;
 }
 
-void readUserCommand(void)
-{
-    printf("$ ");
-    fgets(cmd, MAX_CMD_LEN, stdin);
-    cmd[strcspn(cmd, "\n")] = '\0';
-}
-
-void tokenizeCommand(void)
-{
-    i = 0;
-    char *token;
-    char *delim = " ";
-    token = strtok(cmd, delim);
-    while (token)
-    {
-        args[i++] = token;
-        token = strtok(NULL, delim);
-    }
-
-    // Ensure the last element of args is NULL
-    args[i] = NULL;
-}
-
-
-
-void handleCtrlC(int signum)
-{
-    (void)signum;
-    exit(EXIT_SUCCESS);
-}
-
 void runShell(void)
 {   
-    // Set up signal handler for Ctrl+C
+    // Handle Ctrl+C
     if (signal(SIGINT, handleCtrlC) == SIG_ERR)
     {
         perror("Error: Couldn't set up signal handler for Ctrl+C.\n");
@@ -91,13 +60,15 @@ void runShell(void)
             {
                 break;
             }
+            /* cd isn't really working at the moment */
             else if(!strcmp(args[0], "cd"))
             {
                 printf("Where you going?\n");
                 continue;
             }
+            /* Create a child process */
             pid = fork();
-            /* Error */
+            /* Error couldn't create the child */
             if (pid < 0)
             {
                 printf("Error: fork.\n");
@@ -120,4 +91,35 @@ void runShell(void)
         }
     }
     
+}
+
+void readUserCommand(void)
+{
+    printf("$ ");
+    fgets(cmd, MAX_CMD_LEN, stdin);
+    cmd[strcspn(cmd, "\n")] = '\0';
+}
+
+void tokenizeCommand(void)
+{
+    i = 0;
+    char *token;
+    char *delim = " ";
+    token = strtok(cmd, delim);
+    while (token)
+    {
+        args[i++] = token;
+        token = strtok(NULL, delim);
+    }
+
+    // Set the last element of args to NULL
+    args[i] = NULL;
+}
+
+
+
+void handleCtrlC(int signum)
+{
+    (void)signum;
+    exit(EXIT_SUCCESS);
 }
