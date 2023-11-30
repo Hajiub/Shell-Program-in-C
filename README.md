@@ -3,10 +3,11 @@
 ## Introduction
 
 This C program is a simple shell implementation that allows users to enter commands. It includes basic features like command execution, handling Ctrl + C, and of course simple string parsing.
+[Demo]([Video_URL](https://youtu.be/SgHW8U0RJ_o?si=kuKYSi38QmpzrtiM))
 
 ## Code Explanation
 
-### Global Variable
+### Global Variables
 
 * `char cmd[MAX_CMD_LEN]`:An array of chars to store the user's command
 
